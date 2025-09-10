@@ -6,7 +6,7 @@ from datetime import datetime
 app = FastAPI()
 
 TELEGRAM_BOT_TOKEN = "7554629243:AAFv2PnwsgTyNG0eEIYP-h9aSGmUf2yvaJU"
-TELEGRAM_CHAT_ID = "6717395416"
+TELEGRAM_CHAT_ID = "6717395416"  # Your admin ID
 
 def send_to_telegram(message: str, urgent=False):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -35,6 +35,7 @@ async def telegram_webhook(request: Request):
     print("📩 RECEIVED TELEGRAM UPDATE:")
     print(update)
 
+    # Extract user info — even if not "first message"
     if "message" in update:
         user = update["message"]["from"]
         user_id = user.get("id", "unknown")
@@ -46,17 +47,16 @@ async def telegram_webhook(request: Request):
 
         name = f"{first_name} {last_name}".strip() or "Anonymous"
         notification = (
-            f"👤 *NEW VISITOR DETECTED*\n\n"
+            f"💬 *MESSAGE RECEIVED*\n\n"  # Changed from "NEW VISITOR" to "MESSAGE RECEIVED"
             f"🆔 User ID: `{user_id}`\n"
             f"👤 Name: {name}\n"
             f"📝 Username: @{username}\n"
             f"🗣️ Language: {language.upper()}\n"
             f"💬 Message: _{message_text[:50]}{'...' if len(message_text) > 50 else ''}_\n"
-            f"🕒 Time: {datetime.utcnow().strftime('%H:%M UTC')}\n"
-            f"💳 Status: Awaiting Payment"
+            f"🕒 Time: {datetime.utcnow().strftime('%H:%M UTC')}"
         )
 
-        send_to_telegram(notification, urgent=True)
+        send_to_telegram(notification, urgent=True)  # Notify on EVERY message
 
     return {"status": "ok"}
 
